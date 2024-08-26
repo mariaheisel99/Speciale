@@ -1,0 +1,100 @@
+
+# Definition of water phantom
+sv:Ph/Default/Modules			    = 6 "g4em-standard_opt3" "g4h-phy_QGSP_BIC_HP" "g4decay" "g4ion-binarycascade" "g4h-elastic_HP" "g4stopping"
+i:Ts/NumberOfThreads 			    = 0
+b:Ts/PauseBeforeSequence 		    = "False"
+i:Ts/ShowHistoryCountAtInterval 	    = 10000 # how often to print history count to the console
+b:Ts/ShowHistoryCountOnSingleLine 	    = "FALSE" # Make count reuse a single line of console
+
+######################################
+# Geometry
+######################################
+
+Ge/World/HLX = 101 mm
+Ge/World/HLY = 101 mm
+Ge/World/HLZ = 101 mm
+
+# To reach ~60 Gy at maximum dose in the target
+u:Sc/ScaleFactor = 5779493.074240799
+
+s:Ge/WaterPhantom/Parent = "World"
+s:Ge/WaterPhantom/Type   = "TsBox"
+s:Ge/WaterPhantom/Material = "G4_WATER"
+d:Ge/WaterPhantom/HLX = 40 mm
+d:Ge/WaterPhantom/HLY = 40 mm
+d:Ge/WaterPhantom/HLZ = 100 mm
+d:Ge/WaterPhantom/TransX =  0.0 cm
+d:Ge/WaterPhantom/TransY =  0.0 cm
+d:Ge/WaterPhantom/TransZ =  0.0 cm
+d:Ge/WaterPhantom/RotX= 0. deg
+d:Ge/WaterPhantom/RotY= 0. deg
+d:Ge/WaterPhantom/RotZ= 0. deg
+ic:Ge/WaterPhantom/Zbins 		    = 100
+ic:Ge/WaterPhantom/Xbins 		    = 40
+ic:Ge/WaterPhantom/Ybins 		    = 40
+
+u:Sc/WaterPhantom/OutcomeOutputScaleFactor = Sc/ScaleFactor
+i:Sc/WaterPhantom/NumberOfFraction = 20
+
+# Set a raw SOBP
+s:Tf/Energy/Function = "Step"
+dv:Tf/Energy/Times = 5 20 40 60 80 100 ms
+dv:Tf/Energy/Values = 5 160 155 150 145 140 MeV
+s:Tf/Histories/Function = "Step"
+dv:Tf/Histories/Times = 5 20 40 60 80 100 ms
+iv:Tf/Histories/Values = 5 6600 2500 1750 1400 1200
+
+s:So/Example/Type                     = "Beam"
+s:So/Example/Component                = "BeamPosition"
+s:So/Example/BeamParticle             = "proton"
+d:So/Example/BeamEnergy               = Tf/Energy/Value MeV
+u:So/Example/BeamEnergySpread         = 0.757504
+s:So/Example/BeamPositionDistribution = "Flat"
+s:So/Example/BeamPositionCutoffShape  = "Ellipse"
+d:So/Example/BeamPositionCutoffX      = 10. mm
+d:So/Example/BeamPositionCutoffY      = 10. mm
+s:So/Example/BeamAngularDistribution  = "None"
+i:So/Example/NumberOfHistoriesInRun   = 10 * Tf/Histories/Value
+
+
+#Dose
+s:Sc/Dose/Quantity                      	= "DoseToMedium"
+s:Sc/Dose/Component                     	= "WaterPhantom"
+bc:Sc/Dose/OutputToConsole              	= "FALSE"
+s:Sc/Dose/IfOutputFileAlreadyExists  	= "Overwrite"
+sv:Sc/Dose/OnlyIncludeParticlesNamed 	= 1 "proton"
+s:Sc/Dose/OutputFile 				= "../results/Dose"
+
+
+#LETProtons
+s:Sc/PLET/Quantity				= "ProtonLET"
+s:Sc/PLET/WeightBy              		= "dose"
+s:Sc/PLET/Component             		= "WaterPhantom"
+bc:Sc/PLET/OutputToConsole			= "FALSE"
+s:Sc/PLET/IfOutputFileAlreadyExists  	= "Overwrite"
+sv:Sc/PLET/OnlyIncludeParticlesNamed 	= 1 "proton"
+d:Sc/PLET/MaxScoredLET 				= 100 MeV/mm/(g/cm3)
+s:Sc/PLET/OutputFile 				= "results/LET"
+
+#Qeff
+s:Sc/Qeff/Quantity                      	= "Qeff"
+s:Sc/Qeff/WeightBy				= "dose"
+s:Sc/Qeff/Component                     	= "WaterPhantom"
+s:Sc/Qeff/IfOutputFileAlreadyExists		= "Overwrite"
+sv:Sc/Qeff/includeparticles             	= 1 "proton"
+s:Sc/Qeff/OutputFile 				= "results/Qeff"
+bc:Sc/Qeff/OutputToConsole 			= "True"
+
+###############################################
+# Graphics
+###############################################
+
+# Proton (blue), elektron(red), foton (green)
+s:Gr/ViewA/Type             			= "OpenGL"
+#bc:Gr/ViewA/IncludeAxes 			= "True" # defaults to "False"
+#sc:Gr/ViewA/AxesComponent 			= "World" # Component in which to center the axes. Defaults to World.
+#dc:Gr/ViewA/AxesSize 				= 1. m # size of axes
+b:Ts/UseQt 						= "True" #If true the interface window shows.
+# This line is to prevent the visualation window from closing when the simulation are done.
+b:Ts/PauseBeforeQuit 				= "True"
+
